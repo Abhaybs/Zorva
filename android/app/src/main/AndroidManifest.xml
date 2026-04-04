@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name=".ZorvaApp"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.GigShield"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="34">
+
+        <!-- Dashboard (Main) -->
+        <activity
+            android:name=".ui.dashboard.DashboardActivity"
+            android:exported="true"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- SOS -->
+        <activity
+            android:name=".ui.sos.SosActivity"
+            android:exported="false"
+            android:label="@string/sos_title" />
+
+        <!-- OCR Scanner -->
+        <activity
+            android:name=".ui.ocr.OcrScannerActivity"
+            android:exported="false"
+            android:label="@string/ocr_title" />
+
+        <!-- Legal Shield -->
+        <activity
+            android:name=".ui.legal.LegalShieldActivity"
+            android:exported="false"
+            android:label="@string/legal_title" />
+
+        <!-- Background Location Service -->
+        <service
+            android:name=".services.LocationService"
+            android:exported="false"
+            android:foregroundServiceType="location" />
+
+        <!-- SMS Listener Service -->
+        <service
+            android:name=".services.SmsListenerService"
+            android:exported="false" />
+
+        <!-- SMS Broadcast Receiver -->
+        <receiver
+            android:name=".ui.sms.SmsReaderService"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>

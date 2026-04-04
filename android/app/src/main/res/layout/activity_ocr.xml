@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="📷 Earnings Scanner"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/primary_teal"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSelectImage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Select Screenshot"
+            android:layout_marginBottom="16dp" />
+
+        <ImageView
+            android:id="@+id/ivPreview"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:scaleType="centerCrop"
+            android:background="@color/card_dark"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select an earnings screenshot to scan"
+            android:textColor="@color/text_secondary"
+            android:textSize="14sp"
+            android:layout_marginBottom="12dp" />
+
+        <TextView
+            android:id="@+id/tvParsedAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Amount: --"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/success_green"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tvParsedPlatform"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Platform: --"
+            android:textSize="16sp"
+            android:textColor="@color/text_primary"
+            android:layout_marginBottom="16dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveIncome"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save to Income"
+            android:layout_marginBottom="24dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Raw OCR Text:"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tvRawText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="@color/text_secondary"
+            android:textSize="11sp"
+            android:background="@color/card_dark"
+            android:padding="12dp"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+</ScrollView>

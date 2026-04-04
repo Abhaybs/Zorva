@@ -1,0 +1,42 @@
+# Gitignore for Gigshield
+
+# General
+.idea/
+.vscode/
+
+# Python / Backend / ML Engine
+__pycache__/
+*.py[cod]
+*$py.class
+env/
+venv/
+venv1/
+.venv/
+.env
+*.joblib
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Android
+*.iml
+.gradle/
+/local.properties
+/.idea/workspace.xml
+/.idea/tasks.xml
+/.idea/gradle.xml
+/.idea/assetWizardSettings.xml
+/.idea/dictionaries
+/.idea/libraries
+.cxx/
+/captures/
+.externalNativeBuild/
+.cxx/
+local.properties
+# Builds
+build/
+app/build/
+android/build/
+android/app/build/
+android/.gradle/
