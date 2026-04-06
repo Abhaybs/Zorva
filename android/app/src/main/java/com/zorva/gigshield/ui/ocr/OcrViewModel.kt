@@ -22,6 +22,10 @@ class OcrViewModel : ViewModel() {
     private val _parsedPlatform = MutableLiveData<String?>()
     val parsedPlatform: LiveData<String?> = _parsedPlatform
 
+    /** Platform explicitly chosen by the user in the dropdown. Overrides OCR detection. */
+    private val _selectedPlatform = MutableLiveData<String?>()
+    val selectedPlatform: LiveData<String?> = _selectedPlatform
+
     private val _saveStatus = MutableLiveData<String>()
     val saveStatus: LiveData<String> = _saveStatus
 
@@ -35,6 +39,10 @@ class OcrViewModel : ViewModel() {
         "zepto" to listOf("zepto"),
         "blinkit" to listOf("blinkit"),
     )
+
+    fun setSelectedPlatform(platform: String) {
+        _selectedPlatform.value = platform.lowercase()
+    }
 
     fun parseEarningsText(rawText: String) {
         val textLower = rawText.lowercase()
@@ -63,7 +71,10 @@ class OcrViewModel : ViewModel() {
 
     fun saveExtractedIncome() {
         val amount = _parsedAmount.value ?: return
-        val platform = _parsedPlatform.value ?: "other"
+        // Prefer dropdown selection, fall back to OCR-detected platform
+        val platform = _selectedPlatform.value?.takeIf { it.isNotBlank() }
+            ?: _parsedPlatform.value
+            ?: "other"
 
         if (amount <= 0) {
             _saveStatus.value = "No valid amount to save"

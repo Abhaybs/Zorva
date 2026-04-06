@@ -1,7 +1,7 @@
 """GigScore Engine — computes gig worker credit score using heuristics / ML model."""
 
 from __future__ import annotations
-import random
+from datetime import datetime, timezone
 from typing import Any
 
 
@@ -24,7 +24,7 @@ class GigScoreEngine:
         # ── Feature extraction ────────────────────────────────
         income_consistency = self._income_consistency(income_records)
         trip_completion = self._trip_completion(income_records)
-        rating_reliability = self._rating_reliability(worker)
+        rating_reliability = self._rating_reliability(worker, income_records)
         work_pattern = self._work_pattern(income_records)
         platform_diversity = self._platform_diversity(income_records)
 
@@ -104,12 +104,41 @@ class GigScoreEngine:
         else:
             return 20.0
 
-    def _rating_reliability(self, worker: Any) -> float:
+    def _rating_reliability(self, worker: Any, records: list) -> float:
         """
-        Score based on platform ratings.
-        Placeholder — in prod, pulled from worker profile / screenshots.
+        Deterministic reliability proxy.
+
+        Until platform ratings are ingested, estimate reliability from:
+        - income consistency
+        - work volume
+        - account tenure
         """
-        return round(random.uniform(60, 95), 1)
+        if not records:
+            return 35.0
+
+        amounts = [r.amount for r in records if getattr(r, "amount", None) is not None]
+        if not amounts:
+            return 35.0
+
+        avg = sum(amounts) / len(amounts)
+        variance = sum((a - avg) ** 2 for a in amounts) / len(amounts)
+        cv = (variance ** 0.5) / avg if avg > 0 else 1.5
+
+        consistency_factor = max(0.0, 1.0 - min(cv, 1.5) / 1.5)
+        volume_factor = min(1.0, len(amounts) / 120.0)
+
+        created_at = getattr(worker, "created_at", None)
+        if created_at is not None and created_at.tzinfo is None:
+            created_at = created_at.replace(tzinfo=timezone.utc)
+
+        if created_at is not None:
+            tenure_days = max(0, (datetime.now(timezone.utc) - created_at).days)
+        else:
+            tenure_days = 30
+        tenure_factor = min(1.0, tenure_days / 180.0)
+
+        score = 45.0 + (consistency_factor * 25.0) + (volume_factor * 20.0) + (tenure_factor * 10.0)
+        return round(max(25.0, min(95.0, score)), 1)
 
     def _work_pattern(self, records: list) -> float:
         """Score based on work regularity and time distribution."""

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.auth.firebase import get_current_user
+from app.auth.supabase import get_current_user
 from app.services.scheme_matcher import SchemeMatcher
 from app.services.worker_resolver import resolve_worker_for_user
 

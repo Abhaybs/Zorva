@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.auth.firebase import get_current_user
+from app.auth.supabase import get_current_user
 from app.models.income import IncomeRecord, IncomeSource, IncomePlatform
 from app.schemas.income import IncomeRecordCreate, IncomeRecordOut, IncomeSummary
 from app.services.worker_resolver import resolve_worker_for_user

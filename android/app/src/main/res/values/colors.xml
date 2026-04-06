@@ -21,6 +21,16 @@
     <!-- Semantic -->
     <color name="success_green">#FF4CAF50</color>
     <color name="sos_red">#FFD32F2F</color>
-    <color name="sos_background">#FF1A0000</color>
+    <color name="sos_background">#FF0D1A19</color>
     <color name="warning_orange">#FFFF9800</color>
+
+    <!-- Platform brand colours -->
+    <color name="swiggy_orange">#FFFF6B00</color>
+    <color name="ola_green">#FF00C853</color>
+    <color name="zomato_red">#FFE23744</color>
+    <color name="rapido_yellow">#FFFFD600</color>
+    <color name="blinkit_yellow">#FFF1C40F</color>
+
+    <!-- Nav -->
+    <color name="nav_bg">#FF1A1A1A</color>
 </resources>

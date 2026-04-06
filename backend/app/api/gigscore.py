@@ -1,19 +1,16 @@
 """GigScore API — trigger ML model and retrieve scores."""
 
 from __future__ import annotations
-import uuid
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.auth.firebase import get_current_user
-from app.models.worker import Worker
+from app.auth.supabase import get_current_user
 from app.models.gigscore import GigScoreRecord
 from app.models.income import IncomeRecord
-from app.schemas.gigscore import GigScoreRequest, GigScoreOut, GigScoreBreakdown, GigScoreHistory
+from app.schemas.gigscore import GigScoreOut, GigScoreBreakdown, GigScoreHistory
 from app.services.gigscore_engine import GigScoreEngine
 from app.services.worker_resolver import resolve_worker_for_user
 
@@ -23,18 +20,11 @@ score_engine = GigScoreEngine()
 
 @router.post("/calculate", response_model=GigScoreOut, status_code=201)
 async def calculate_gigscore(
-    payload: GigScoreRequest,
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Trigger GigScore computation using the ML model."""
-    # Fetch worker
-    result = await db.execute(
-        select(Worker).where(Worker.id == payload.worker_id)
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    """Trigger GigScore computation for the authenticated worker."""
+    worker = await resolve_worker_for_user(db, user)
 
     # Fetch income history for feature engineering
     income_result = await db.execute(

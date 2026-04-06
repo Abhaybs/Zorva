@@ -57,6 +57,18 @@
             android:exported="false"
             android:label="@string/legal_title" />
 
+        <!-- Earnings Optimizer -->
+        <activity
+            android:name=".ui.earnings.EarningsOptimizerActivity"
+            android:exported="false"
+            android:label="Earn More" />
+
+        <!-- GigScore -->
+        <activity
+            android:name=".ui.gigscore.GigScoreActivity"
+            android:exported="false"
+            android:label="GigScore" />
+
         <!-- Background Location Service -->
         <service
             android:name=".services.LocationService"

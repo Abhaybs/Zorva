@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import get_settings
 from app.db.database import engine, Base
-from app.api import income, gigscore, insurance, sos, schemes
+from app.api import income, gigscore, insurance, sos, schemes, earnings_optimizer
 
 
 logger = logging.getLogger(__name__)
@@ -63,11 +63,12 @@ app.add_middleware(
 )
 
 # ── Route registration ───────────────────────────────────────
-app.include_router(income.router,    prefix="/api/v1/income",     tags=["Income"])
-app.include_router(gigscore.router,  prefix="/api/v1/gigscore",   tags=["GigScore"])
-app.include_router(insurance.router, prefix="/api/v1/insurance",  tags=["Insurance"])
-app.include_router(sos.router,       prefix="/api/v1/sos",        tags=["SOS"])
-app.include_router(schemes.router,   prefix="/api/v1/schemes",    tags=["Schemes"])
+app.include_router(income.router,              prefix="/api/v1/income",     tags=["Income"])
+app.include_router(gigscore.router,            prefix="/api/v1/gigscore",   tags=["GigScore"])
+app.include_router(insurance.router,           prefix="/api/v1/insurance",  tags=["Insurance"])
+app.include_router(sos.router,                 prefix="/api/v1/sos",        tags=["SOS"])
+app.include_router(schemes.router,             prefix="/api/v1/schemes",    tags=["Schemes"])
+app.include_router(earnings_optimizer.router,  prefix="/api/v1/earnings",   tags=["Earnings"])
 
 
 @app.get("/", tags=["Health"])

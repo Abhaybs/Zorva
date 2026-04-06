@@ -7,9 +7,6 @@ import androidx.lifecycle.viewModelScope
 import com.zorva.gigshield.data.repository.WorkerRepository
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel for SOS screen.
- */
 class SosViewModel : ViewModel() {
 
     private val repository = WorkerRepository()
@@ -28,31 +25,27 @@ class SosViewModel : ViewModel() {
     fun triggerSos(latitude: Double, longitude: Double, message: String?) {
         viewModelScope.launch {
             _sosStatus.value = "Sending SOS..."
-
             repository.triggerSos(
-                workerId = "dev-worker-001",
+                workerId = "",
                 lat = latitude,
                 lng = longitude,
                 message = message
             ).fold(
                 onSuccess = { response ->
                     currentEventId = response["id"] as? String
-                    _sosStatus.value = "SOS ACTIVE — Help is on the way"
+                    _sosStatus.value = "SOS ACTIVE \u2014 Help is on the way"
                     _isTriggered.value = true
                 },
-                onFailure = {
+                onFailure = { err ->
                     _sosStatus.value = "Failed to send SOS"
-                    _error.value = it.message
+                    _error.value = err.message
                 }
             )
         }
     }
 
     fun resolveSos() {
-        val eventId = currentEventId ?: return
         viewModelScope.launch {
-            _sosStatus.value = "Resolving..."
-            // Simplified — real app would call resolve API
             _sosStatus.value = "Resolved"
             _isTriggered.value = false
             currentEventId = null

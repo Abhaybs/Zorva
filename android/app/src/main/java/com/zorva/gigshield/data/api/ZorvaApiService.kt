@@ -1,8 +1,12 @@
 package com.zorva.gigshield.data.api
 
+import com.zorva.gigshield.data.model.BestHoursResponse
 import com.zorva.gigshield.data.model.GigScore
 import com.zorva.gigshield.data.model.Income
+import com.zorva.gigshield.data.model.SosRequest
+import com.zorva.gigshield.data.model.SosResponse
 import com.zorva.gigshield.data.model.Worker
+import com.zorva.gigshield.data.model.ZoneRecommendationsResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -39,9 +43,7 @@ interface ZorvaApiService {
 
     // ── GigScore ────────────────────────────────────────────
     @POST("gigscore/calculate")
-    suspend fun calculateGigScore(
-        @Body body: Map<String, String>
-    ): Response<GigScore>
+    suspend fun calculateGigScore(): Response<GigScore>
 
     @GET("gigscore/current")
     suspend fun getCurrentGigScore(): Response<GigScore>
@@ -66,18 +68,18 @@ interface ZorvaApiService {
 
     // ── SOS ─────────────────────────────────────────────────
     @POST("sos/trigger")
-    suspend fun triggerSos(@Body body: Map<String, Any>): Response<Map<String, Any>>
+    suspend fun triggerSos(@Body body: SosRequest): Response<SosResponse>
 
     @GET("sos/status/{eventId}")
     suspend fun getSosStatus(
         @Path("eventId") eventId: String
-    ): Response<Map<String, Any>>
+    ): Response<SosResponse>
 
     @PUT("sos/resolve/{eventId}")
     suspend fun resolveSos(
         @Path("eventId") eventId: String,
-        @Body body: Map<String, Any>
-    ): Response<Map<String, Any>>
+        @Body body: @JvmSuppressWildcards Map<String, Any>
+    ): Response<SosResponse>
 
     @GET("sos/active")
     suspend fun getActiveSos(): Response<List<Map<String, Any>>>
@@ -88,4 +90,17 @@ interface ZorvaApiService {
 
     @GET("schemes/all")
     suspend fun getAllSchemes(): Response<Map<String, Any>>
+
+    // ── Earnings Optimizer ──────────────────────────────────
+    @GET("earnings/zones")
+    suspend fun getRecommendedZones(
+        @Query("top_n") topN: Int = 5,
+        @Query("lat") lat: Double? = null,
+        @Query("lng") lng: Double? = null
+    ): Response<ZoneRecommendationsResponse>
+
+    @GET("earnings/best-hours")
+    suspend fun getBestHours(
+        @Query("zone") zone: String
+    ): Response<BestHoursResponse>
 }

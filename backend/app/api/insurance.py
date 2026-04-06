@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.auth.firebase import get_current_user
+from app.auth.supabase import get_current_user
 from app.models.worker import Worker
 from app.models.insurance import InsurancePolicy, InsuranceType, PolicyStatus
 from app.schemas.insurance import (

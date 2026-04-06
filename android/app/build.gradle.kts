@@ -9,6 +9,26 @@ val backendBaseUrl = (project.findProperty("backendBaseUrl") as String?)
 val deviceBackendBaseUrl = (project.findProperty("deviceBackendBaseUrl") as String?)
     ?: "http://127.0.0.1:8000/api/v1/"
 
+val supabaseUrl = (project.findProperty("supabaseUrl") as String?)
+    ?: ""
+
+val supabaseAnonKey = (project.findProperty("supabaseAnonKey") as String?)
+    ?: ""
+
+val supabaseEmail = (project.findProperty("supabaseEmail") as String?)
+    ?: ""
+
+val supabasePassword = (project.findProperty("supabasePassword") as String?)
+    ?: ""
+
+fun asBuildConfigString(raw: String): String {
+    val normalized = raw.trim().removeSurrounding("\"")
+    val escaped = normalized
+        .replace("\\", "\\\\")
+        .replace("\"", "\\\"")
+    return "\"$escaped\""
+}
+
 android {
     namespace = "com.zorva.gigshield"
     compileSdk = 34
@@ -23,10 +43,16 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // `backendBaseUrl` can be AUTO, emulator URL, or LAN URL.
-        buildConfigField("String", "API_BASE_URL", "\"$backendBaseUrl\"")
+        buildConfigField("String", "API_BASE_URL", asBuildConfigString(backendBaseUrl))
         // Used for real devices when API_BASE_URL=AUTO.
         // Override with: -PdeviceBackendBaseUrl=http://<your-pc-lan-ip>:8000/api/v1/
-        buildConfigField("String", "DEVICE_API_BASE_URL", "\"$deviceBackendBaseUrl\"")
+        buildConfigField("String", "DEVICE_API_BASE_URL", asBuildConfigString(deviceBackendBaseUrl))
+
+        // Supabase Auth (pass via gradle properties; keep defaults empty in VCS)
+        buildConfigField("String", "SUPABASE_URL", asBuildConfigString(supabaseUrl))
+        buildConfigField("String", "SUPABASE_ANON_KEY", asBuildConfigString(supabaseAnonKey))
+        buildConfigField("String", "SUPABASE_EMAIL", asBuildConfigString(supabaseEmail))
+        buildConfigField("String", "SUPABASE_PASSWORD", asBuildConfigString(supabasePassword))
     }
 
     buildTypes {
@@ -78,9 +104,8 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    // ── Firebase ────────────────────────────────────────────
+    // ── Firebase (Realtime + Messaging) ─────────────────────
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
-    implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.firebase:firebase-messaging-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
 

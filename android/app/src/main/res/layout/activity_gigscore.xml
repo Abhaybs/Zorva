@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background_dark">
+
+    <!-- Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/surface_dark"
+        app:title="GigScore"
+        app:titleTextColor="@color/text_primary"
+        app:navigationIcon="?attr/homeAsUpIndicator" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Score Circle -->
+            <FrameLayout
+                android:layout_width="160dp"
+                android:layout_height="160dp"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_score_circle">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tvScore"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:textColor="#00BFA5"
+                        android:textSize="44sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="/ 900"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- Status label -->
+            <TextView
+                android:id="@+id/tvScoreStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="24dp"
+                android:text="Calculating…"
+                android:textColor="@color/text_secondary"
+                android:textSize="15sp" />
+
+            <!-- Breakdown Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/surface_dark"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Score Breakdown"
+                        android:textColor="@color/text_primary"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Income Consistency -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Income Consistency" android:textColor="@color/text_secondary" android:textSize="13sp" />
+                            <TextView android:id="@+id/tvIncomeConsistency" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00BFA5" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <ProgressBar android:id="@+id/pbIncomeConsistency" style="@style/Widget.AppCompat.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="6dp" android:max="100" android:progress="0" android:progressTint="#00BFA5" android:progressBackgroundTint="#2A2A2A" />
+                    </LinearLayout>
+
+                    <!-- Trip Completion -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Trip Completion" android:textColor="@color/text_secondary" android:textSize="13sp" />
+                            <TextView android:id="@+id/tvTripCompletion" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00BFA5" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <ProgressBar android:id="@+id/pbTripCompletion" style="@style/Widget.AppCompat.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="6dp" android:max="100" android:progress="0" android:progressTint="#00BFA5" android:progressBackgroundTint="#2A2A2A" />
+                    </LinearLayout>
+
+                    <!-- Rating Reliability -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Rating Reliability" android:textColor="@color/text_secondary" android:textSize="13sp" />
+                            <TextView android:id="@+id/tvRatingReliability" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00BFA5" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <ProgressBar android:id="@+id/pbRatingReliability" style="@style/Widget.AppCompat.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="6dp" android:max="100" android:progress="0" android:progressTint="#00BFA5" android:progressBackgroundTint="#2A2A2A" />
+                    </LinearLayout>
+
+                    <!-- Work Pattern -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:layout_marginBottom="12dp">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Work Pattern" android:textColor="@color/text_secondary" android:textSize="13sp" />
+                            <TextView android:id="@+id/tvWorkPattern" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00BFA5" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <ProgressBar android:id="@+id/pbWorkPattern" style="@style/Widget.AppCompat.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="6dp" android:max="100" android:progress="0" android:progressTint="#00BFA5" android:progressBackgroundTint="#2A2A2A" />
+                    </LinearLayout>
+
+                    <!-- Platform Diversity -->
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical">
+                        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Platform Diversity" android:textColor="@color/text_secondary" android:textSize="13sp" />
+                            <TextView android:id="@+id/tvPlatformDiversity" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--" android:textColor="#00BFA5" android:textSize="13sp" android:textStyle="bold" />
+                        </LinearLayout>
+                        <ProgressBar android:id="@+id/pbPlatformDiversity" style="@style/Widget.AppCompat.ProgressBar.Horizontal" android:layout_width="match_parent" android:layout_height="6dp" android:max="100" android:progress="0" android:progressTint="#00BFA5" android:progressBackgroundTint="#2A2A2A" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Recalculate Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnRecalculate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Recalculate Score"
+                android:textColor="@color/background_dark"
+                app:backgroundTint="#00BFA5" />
+
+            <!-- Last computed -->
+            <TextView
+                android:id="@+id/tvComputedAt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:text=""
+                android:textColor="@color/text_secondary"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

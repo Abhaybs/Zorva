@@ -9,8 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
-from app.auth.firebase import get_current_user
-from app.models.worker import Worker
+from app.auth.supabase import get_current_user
 from app.models.sos import SosEvent, SosStatus
 from app.schemas.sos import SosTriggerRequest, SosEventOut, SosResolveRequest
 from app.services.worker_resolver import resolve_worker_for_user
@@ -24,22 +23,7 @@ async def trigger_sos(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """
-    Trigger an SOS event.
-
-    In production this would:
-    1. Save GPS coordinates
-    2. Send FCM push notifications to emergency contacts
-    3. Broadcast to nearby peer workers via Firebase RTDB
-    4. Optionally notify local authorities
-    """
-    # Verify worker
-    result = await db.execute(
-        select(Worker).where(Worker.id == payload.worker_id)
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    worker = await resolve_worker_for_user(db, user)
 
     contacts_str = None
     if payload.emergency_contacts:
@@ -56,11 +40,6 @@ async def trigger_sos(
     db.add(event)
     await db.flush()
     await db.refresh(event)
-
-    # TODO: Integrate Firebase Cloud Messaging (FCM) for push notifications
-    # TODO: Write to Firebase Realtime DB for live tracking
-    # TODO: Reverse geocode to populate address field
-
     return event
 
 
@@ -70,7 +49,6 @@ async def get_sos_status(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get the current status of an SOS event."""
     result = await db.execute(
         select(SosEvent).where(SosEvent.id == event_id)
     )
@@ -87,14 +65,12 @@ async def resolve_sos(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Resolve an active SOS event."""
     result = await db.execute(
         select(SosEvent).where(SosEvent.id == event_id)
     )
     event = result.scalar_one_or_none()
     if not event:
         raise HTTPException(status_code=404, detail="SOS event not found")
-
     if event.status == SosStatus.RESOLVED:
         raise HTTPException(status_code=400, detail="Event already resolved")
 
@@ -102,7 +78,6 @@ async def resolve_sos(
     event.resolved_at = datetime.now(timezone.utc)
     await db.flush()
     await db.refresh(event)
-
     return event
 
 
@@ -111,9 +86,7 @@ async def get_active_sos(
     user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    """Get all active (unresolved) SOS events for the worker."""
     worker = await resolve_worker_for_user(db, user)
-
     events_result = await db.execute(
         select(SosEvent)
         .where(SosEvent.worker_id == worker.id)

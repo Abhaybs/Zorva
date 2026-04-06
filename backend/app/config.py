@@ -10,8 +10,14 @@ class Settings(BaseSettings):
     # ── Database ──────────────────────────────────────────────
     database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/zorva"
 
-    # ── Firebase ──────────────────────────────────────────────
+    # ── Realtime / Push (optional Firebase integration) ──────
     firebase_credentials_path: str = "./firebase-credentials.json"
+
+    # ── Supabase Auth ─────────────────────────────────────────
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_jwt_secret: str = ""
+    supabase_jwt_audience: str = "authenticated"
 
     # ── JWT ───────────────────────────────────────────────────
     jwt_secret: str = "change-me-in-production"
