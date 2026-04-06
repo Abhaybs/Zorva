@@ -7,12 +7,12 @@
 ```
 ┌─────────────────────────────────────────────────────┐
 │  Layer 1 — Android App (Kotlin)                     │
-│  Dashboard │ SOS+GPS │ OCR Scanner │ SMS │ Legal    │
+│  Dashboard │ GigScore │ Earn More │ SOS │ OCR │ Legal│
 └──────────────────────┬──────────────────────────────┘
-                       │ HTTPS / JWT
+                       │ HTTPS / Supabase JWT
 ┌──────────────────────▼──────────────────────────────┐
 │  Layer 2 — FastAPI Backend (Python)                 │
-│  Income API │ GigScore │ Insurance │ SOS │ Schemes  │
+│  Income API │ GigScore │ Earnings Optimizer │ SOS   │
 └──────────────────────┬──────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────┐
@@ -22,7 +22,7 @@
                        │
 ┌──────────────────────▼──────────────────────────────┐
 │  Layer 4 — Data Layer                               │
-│  PostgreSQL+PostGIS │ Firebase RT │ Razorpay │ AA   │
+│  Supabase PostgreSQL │ Firebase RT │ PostGIS         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -35,11 +35,26 @@ cd backend
 python -m venv venv
 venv\Scripts\activate  # Windows
 pip install -r requirements.txt
-cp .env.example .env   # Edit database URL
-uvicorn app.main:app --reload --port 8000
+cp .env.example .env   # Edit Supabase URL, keys, DB URL
+# Run from the backend/ directory:
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 Open **http://localhost:8000/docs** for Swagger UI.
+
+> **Note**: Always start uvicorn from inside the `backend/` directory using `app.main:app` (not `backend.app.main:app`).
+
+### Android (Local Dev with Physical Device)
+
+```bash
+# Forward device traffic to local backend
+adb reverse tcp:8000 tcp:8000
+```
+
+1. Open `android/` in **Android Studio**
+2. Sync Gradle
+3. Run on device (API 26+)
+4. Backend URL is `http://127.0.0.1:8000` (via ADB reverse)
 
 ### ML Engine
 
@@ -61,40 +76,33 @@ python models/fatigue/predict.py
 python models/earnings/predict.py
 ```
 
-### Android App
-
-1. Open `android/` in **Android Studio**
-2. Sync Gradle
-3. Run on emulator or device (API 26+)
-4. Backend URL defaults to `10.0.2.2:8000` (emulator → host)
-
 ## Project Structure
 
 ```
 Gigshield/
 ├── backend/              # FastAPI Python backend
 │   ├── app/
-│   │   ├── api/          # 5 route modules
-│   │   ├── auth/         # Firebase + JWT
+│   │   ├── api/          # Route modules (income, gigscore, earnings, sos, schemes, insurance)
+│   │   ├── auth/         # Supabase JWT + Firebase fallback
 │   │   ├── models/       # SQLAlchemy ORM
 │   │   ├── schemas/      # Pydantic validation
-│   │   ├── services/     # Business logic
-│   │   └── db/           # Database layer
+│   │   ├── services/     # Business logic + ML integration
+│   │   └── db/           # Async PostgreSQL (asyncpg/NullPool)
 │   └── requirements.txt
 ├── ml_engine/            # AI/ML pipeline
 │   ├── models/
 │   │   ├── gigscore/     # Random Forest (0-900 score)
 │   │   ├── fatigue/      # Gradient Boosting detector
-│   │   ├── earnings/     # Zone optimizer
+│   │   ├── earnings/     # Zone optimizer (location-aware)
 │   │   └── ocr_nlp/      # OCR + SMS parser
 │   └── data/synthetic/   # Training data generator
 ├── android/              # Kotlin MVVM app
 │   └── app/src/main/
 │       ├── java/com/zorva/gigshield/
-│       │   ├── ui/       # 5 screens
-│       │   ├── data/     # Retrofit + models
-│       │   └── services/ # GPS + SMS background
-│       └── res/          # Layouts + themes
+│       │   ├── ui/       # 6 screens: Dashboard, GigScore, Earn More, SOS, OCR, Legal
+│       │   ├── data/     # Retrofit + models + Supabase auth
+│       │   └── services/ # GPS + SMS background services
+│       └── res/          # Layouts + Material 3 dark theme
 └── docs/                 # Documentation
 ```
 
@@ -108,10 +116,13 @@ Gigshield/
 | POST | `/api/v1/gigscore/calculate` | Trigger ML scoring |
 | GET | `/api/v1/gigscore/current` | Latest GigScore |
 | GET | `/api/v1/gigscore/history` | Score trend |
+| GET | `/api/v1/earnings/zones` | Top zones by ₹/hr (supports `?lat=&lng=`) |
+| GET | `/api/v1/earnings/best-hours` | Best hours for a zone |
+| GET | `/api/v1/earnings/zones/list` | All available zone names |
 | GET | `/api/v1/insurance/plans` | Available micro-insurance |
 | POST | `/api/v1/insurance/subscribe` | Subscribe to plan |
 | POST | `/api/v1/insurance/claim` | File claim |
-| POST | `/api/v1/sos/trigger` | Emergency SOS |
+| POST | `/api/v1/sos/trigger` | Emergency SOS (auth-resolved worker) |
 | GET | `/api/v1/sos/status/{id}` | SOS event status |
 | PUT | `/api/v1/sos/resolve/{id}` | Resolve SOS |
 | GET | `/api/v1/schemes/eligible` | Matched govt schemes |
@@ -123,17 +134,28 @@ Gigshield/
 |-------|-----------|-------|--------|
 | GigScore | Random Forest | 16 features from income history | Score 0-900 |
 | Fatigue | Gradient Boosting | Hours, distance, breaks, patterns | Risk level (low/med/high) |
-| Earnings | Gradient Boosting | Zone, time, demand, workers | ₹/hour prediction |
+| Earnings | Heuristic + Haversine filter | Zone, time, demand, GPS coords | ₹/hour prediction, filtered to 50km radius |
 | OCR | Tesseract + Regex | Screenshot image | Structured earnings data |
 | SMS | Regex + NLP | Payment SMS text | Amount + platform + ref |
 
+## Android Screens
+
+| Screen | Nav Tab | Description |
+|--------|---------|-------------|
+| Dashboard | Home | Platform earnings, best zone banner, quick tiles |
+| GigScore | Score | Score circle (0-900), 5-factor breakdown, recalculate |
+| Earn More | (via Dashboard tile / Best Zone card) | Top zones by ₹/hr, best hours per zone |
+| Income OCR | Income | Scan earnings screenshots |
+| Legal Shield | Shield | Government schemes & rights |
+| SOS | More | Hold-to-trigger emergency, nearby workers |
+
+## Auth
+
+All endpoints require a **Supabase Bearer token** in the `Authorization` header. Worker identity is resolved server-side from the token — no `worker_id` in request bodies.
+
 ## Tech Stack
 
-- **Android**: Kotlin, MVVM, Retrofit, Firebase, ML Kit, Material 3
-- **Backend**: FastAPI, SQLAlchemy, Async PostgreSQL, Firebase Auth
+- **Android**: Kotlin, MVVM, ViewBinding, Retrofit, Supabase Auth, Material 3, FusedLocationProvider
+- **Backend**: FastAPI, SQLAlchemy (asyncio), asyncpg, NullPool (PgBouncer-compatible), Supabase JWT
 - **ML**: Scikit-learn, Tesseract OCR, Pandas, NumPy
-- **Data**: PostgreSQL + PostGIS, Firebase Realtime DB
-
-## License
-
-Proprietary — Zorva Technologies
+- **Data**: Supabase PostgreSQL, Firebase Realtime DB
