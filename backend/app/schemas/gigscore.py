@@ -32,7 +32,10 @@ class GigScoreOut(BaseModel):
     feature_importance: Optional[dict] = None
     computed_at: datetime
 
-    model_config = {"from_attributes": True}
+    model_config = {
+        "from_attributes": True,
+        "protected_namespaces": (),
+    }
 
 
 class GigScoreHistory(BaseModel):

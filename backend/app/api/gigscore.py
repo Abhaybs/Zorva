@@ -15,6 +15,7 @@ from app.models.gigscore import GigScoreRecord
 from app.models.income import IncomeRecord
 from app.schemas.gigscore import GigScoreRequest, GigScoreOut, GigScoreBreakdown, GigScoreHistory
 from app.services.gigscore_engine import GigScoreEngine
+from app.services.worker_resolver import resolve_worker_for_user
 
 router = APIRouter()
 score_engine = GigScoreEngine()
@@ -86,12 +87,7 @@ async def get_current_gigscore(
     db: AsyncSession = Depends(get_db),
 ):
     """Get the worker's latest GigScore."""
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    worker = await resolve_worker_for_user(db, user)
 
     score_result = await db.execute(
         select(GigScoreRecord)
@@ -127,12 +123,7 @@ async def get_gigscore_history(
     db: AsyncSession = Depends(get_db),
 ):
     """Get historical GigScore trend."""
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    worker = await resolve_worker_for_user(db, user)
 
     scores_result = await db.execute(
         select(GigScoreRecord)

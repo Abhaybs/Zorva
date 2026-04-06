@@ -1,21 +1,41 @@
 """Zorva / GigShield — FastAPI application entry point."""
 
 from contextlib import asynccontextmanager
+import logging
+import socket
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import get_settings
 from app.db.database import engine, Base
 from app.api import income, gigscore, insurance, sos, schemes
 
 
+logger = logging.getLogger(__name__)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Startup / shutdown lifecycle hooks."""
+    db_initialized = False
+
     # ── Startup: create tables (dev only) ─────────────────────
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        db_initialized = True
+    except (socket.gaierror, OSError, SQLAlchemyError) as exc:
+        if settings.db_required_on_startup:
+            raise
+        logger.warning(
+            "Database unavailable during startup; continuing without DB initialization. "
+            "Set DB_REQUIRED_ON_STARTUP=true to fail fast. Error: %s",
+            exc,
+        )
+
     yield
+
     # ── Shutdown: dispose engine ──────────────────────────────
     await engine.dispose()
 

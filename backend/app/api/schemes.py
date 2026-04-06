@@ -1,14 +1,13 @@
 """Government Scheme Matcher API — match workers to welfare schemes."""
 
 from __future__ import annotations
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.auth.firebase import get_current_user
-from app.models.worker import Worker
 from app.services.scheme_matcher import SchemeMatcher
+from app.services.worker_resolver import resolve_worker_for_user
 
 router = APIRouter()
 matcher = SchemeMatcher()
@@ -30,12 +29,7 @@ async def get_eligible_schemes(
 
     Checks factors like: income level, platform type, city, age, etc.
     """
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    worker = await resolve_worker_for_user(db, user)
 
     eligible = matcher.match_schemes(worker)
     return {

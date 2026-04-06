@@ -18,6 +18,7 @@ from app.schemas.insurance import (
     InsuranceClaimRequest,
     InsurancePolicyOut,
 )
+from app.services.worker_resolver import resolve_worker_for_user
 
 router = APIRouter()
 
@@ -156,12 +157,7 @@ async def my_policies(
     db: AsyncSession = Depends(get_db),
 ):
     """List all policies for the authenticated worker."""
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    worker = await resolve_worker_for_user(db, user)
 
     policies_result = await db.execute(
         select(InsurancePolicy)

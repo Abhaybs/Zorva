@@ -13,6 +13,7 @@ from app.auth.firebase import get_current_user
 from app.models.worker import Worker
 from app.models.sos import SosEvent, SosStatus
 from app.schemas.sos import SosTriggerRequest, SosEventOut, SosResolveRequest
+from app.services.worker_resolver import resolve_worker_for_user
 
 router = APIRouter()
 
@@ -111,12 +112,7 @@ async def get_active_sos(
     db: AsyncSession = Depends(get_db),
 ):
     """Get all active (unresolved) SOS events for the worker."""
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker not found")
+    worker = await resolve_worker_for_user(db, user)
 
     events_result = await db.execute(
         select(SosEvent)

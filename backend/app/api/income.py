@@ -4,15 +4,15 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, func
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_db
 from app.auth.firebase import get_current_user
 from app.models.income import IncomeRecord, IncomeSource, IncomePlatform
-from app.models.worker import Worker
 from app.schemas.income import IncomeRecordCreate, IncomeRecordOut, IncomeSummary
+from app.services.worker_resolver import resolve_worker_for_user
 
 router = APIRouter()
 
@@ -24,13 +24,7 @@ async def add_income_record(
     db: AsyncSession = Depends(get_db),
 ):
     """Add a new income entry from any source (OCR, SMS, manual, etc.)."""
-    # Find worker by firebase UID
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker profile not found")
+    worker = await resolve_worker_for_user(db, user)
 
     record = IncomeRecord(
         worker_id=worker.id,
@@ -54,12 +48,7 @@ async def get_income_summary(
     db: AsyncSession = Depends(get_db),
 ):
     """Get aggregated income summary for the given period."""
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker profile not found")
+    worker = await resolve_worker_for_user(db, user)
 
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
@@ -95,12 +84,7 @@ async def get_income_history(
     db: AsyncSession = Depends(get_db),
 ):
     """Get detailed income history with optional platform filter."""
-    result = await db.execute(
-        select(Worker).where(Worker.firebase_uid == user["uid"])
-    )
-    worker = result.scalar_one_or_none()
-    if not worker:
-        raise HTTPException(status_code=404, detail="Worker profile not found")
+    worker = await resolve_worker_for_user(db, user)
 
     query = (
         select(IncomeRecord)
